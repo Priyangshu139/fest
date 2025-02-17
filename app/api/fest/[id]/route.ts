@@ -16,8 +16,7 @@ if (!DATABASE_ID || !COLLECTION_ID) {
 interface FestType {
   name?: string;
   description?: string;
-  packs?: string[];
-  image?: string[];
+  image?: string[]; // Assuming URL is represented as a string
   date?: string;
 }
 
@@ -87,12 +86,11 @@ export async function DELETE(req: Request) {
 export async function PUT(req: Request) {
   try {
     const id = getIdFromUrl(req);
-    const { name, description, packs, image, date } = await req.json();
+    const { name, description, image, date } = await req.json();
 
     const updatedData: Partial<FestType> = {
       name,
       description,
-      packs: packs || [],
       image: image || [],
       date,
     };

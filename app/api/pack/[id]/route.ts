@@ -17,6 +17,9 @@ interface PackType {
   name?: string;
   description?: string;
   item?: string[];
+  fest?: string;
+  price?: number;
+  quantity?: number[];
 }
 
 // Fetch a specific pack
@@ -85,12 +88,15 @@ export async function DELETE(req: Request) {
 export async function PUT(req: Request) {
   try {
     const id = getIdFromUrl(req);
-    const { name, description, item } = await req.json();
+    const { name, description, item, fest, price, quantity } = await req.json();
 
     const updatedData: Partial<PackType> = {
       name,
       description,
-      item: item || [],
+      item,
+      fest,
+      price,
+      quantity,
     };
 
     const updatedPack = await updatePack(id, updatedData);

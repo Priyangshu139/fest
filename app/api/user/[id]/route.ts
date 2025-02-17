@@ -12,6 +12,13 @@ if (!DATABASE_ID || !COLLECTION_ID) {
   throw new Error("Missing Appwrite Database or Collection ID in environment variables.");
 }
 
+// Define UserType
+interface UserType {
+  name: string;
+  mobile: string;
+  password: string;
+}
+
 // Fetch a specific user
 async function fetchUser(id: string) {
   try {
@@ -52,13 +59,6 @@ function getIdFromUrl(req: Request): string {
   return parts[parts.length - 1]; // Extract ID from URL
 }
 
-// Define UserType
-interface UserType {
-  name: string;
-  order_IDs: string[];
-  mobile: string; // Updated mobile from number to string
-}
-
 // GET API Route - Fetch a specific user
 export async function GET(req: Request) {
   try {
@@ -85,12 +85,12 @@ export async function DELETE(req: Request) {
 export async function PUT(req: Request) {
   try {
     const id = getIdFromUrl(req);
-    const { name, order_IDs, mobile } = await req.json();
+    const { name, mobile, password } = await req.json();
 
     const updatedData: Partial<UserType> = {
       name,
-      order_IDs: order_IDs || [],
-      mobile: String(mobile), // Ensure mobile is treated as a string
+      mobile,
+      password,
     };
 
     const updatedUser = await updateUser(id, updatedData);

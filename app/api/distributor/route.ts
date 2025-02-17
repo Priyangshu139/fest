@@ -16,8 +16,7 @@ if (!DATABASE_ID || !COLLECTION_ID) {
 interface DistributorType {
   name: string;
   mobile: string; // Ensure mobile is a string
-  items: string[];
-  orders: string[];
+  address: string;
 }
 
 // Fetch all distributors
@@ -58,7 +57,7 @@ export async function GET() {
 // POST API Route - Create a new distributor
 export async function POST(req: Request) {
   try {
-    const { name, mobile, items, orders } = await req.json();
+    const { name, mobile, address } = await req.json();
 
     if (!name || !mobile) {
       return NextResponse.json({ error: "Name and Mobile are required" }, { status: 400 });
@@ -67,8 +66,7 @@ export async function POST(req: Request) {
     const newDistributor: DistributorType = {
       name,
       mobile: String(mobile), // Ensure mobile is stored as a string
-      items: items || [],
-      orders: orders || [],
+      address,
     };
 
     const response = await createDistributor(newDistributor);

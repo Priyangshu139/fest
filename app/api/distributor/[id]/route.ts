@@ -16,8 +16,7 @@ if (!DATABASE_ID || !COLLECTION_ID) {
 interface DistributorType {
   name: string;
   mobile: string; // Mobile stored as string
-  items: string[];
-  orders: string[];
+  address: string;
 }
 
 // Fetch a specific distributor
@@ -86,13 +85,12 @@ export async function DELETE(req: Request) {
 export async function PUT(req: Request) {
   try {
     const id = getIdFromUrl(req);
-    const { name, mobile, items, orders } = await req.json();
+    const { name, mobile, address } = await req.json();
 
     const updatedData: Partial<DistributorType> = {
       name,
       mobile: String(mobile), // Ensure mobile is stored as a string
-      items: items || [],
-      orders: orders || [],
+      address,
     };
 
     const updatedDistributor = await updateDistributor(id, updatedData);

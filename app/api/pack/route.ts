@@ -17,6 +17,9 @@ interface PackType {
   name?: string;
   description?: string;
   item?: string[];
+  fest?: string;
+  price?: number;
+  quantity?: number[];
 }
 
 // Fetch all packs
@@ -54,12 +57,15 @@ export async function GET() {
 // POST API Route - Create a new pack
 export async function POST(req: Request) {
   try {
-    const { name, description, item } = await req.json();
+    const { name, description, item, fest, price, quantity } = await req.json();
 
     const newPack: PackType = {
       name,
       description,
       item: item || [],
+      fest,
+      price,
+      quantity: quantity || [],
     };
 
     const response = await createPack(newPack);

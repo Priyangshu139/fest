@@ -63,6 +63,8 @@ interface ItemType {
   price: number | null;
   image: string[];
   rating: number | null;
+  inventory: number;
+  distributor: string[];
 }
 
 // GET API Route - Fetch a specific item
@@ -91,15 +93,17 @@ export async function DELETE(req: Request) {
 export async function PUT(req: Request) {
   try {
     const id = getIdFromUrl(req);
-    const { name, description, tags, price, image, rating } = await req.json();
+    const { name, description, tags, price, image, rating, inventory, distributor } = await req.json();
 
     const updatedData: Partial<ItemType> = {
       name,
-      description: description || [],
-      tags: tags || [],
-      price: price ?? null,
-      image: image || [],
-      rating: rating ?? null,
+      description,
+      tags,
+      price,
+      image,
+      rating,
+      inventory,
+      distributor,
     };
 
     const updatedItem = await updateItem(id, updatedData);

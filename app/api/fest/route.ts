@@ -16,8 +16,7 @@ if (!DATABASE_ID || !COLLECTION_ID) {
 interface FestType {
   name?: string;
   description?: string;
-  packs?: string[];
-  image?: string[];
+  image?: string[]; // Assuming URL is represented as a string
   date?: string;
 }
 
@@ -56,12 +55,11 @@ export async function GET() {
 // POST API Route - Create a new fest
 export async function POST(req: Request) {
   try {
-    const { name, description, packs, image, date } = await req.json();
+    const { name, description, image, date } = await req.json();
 
     const newFest: FestType = {
       name,
       description,
-      packs: packs || [],
       image: image || [],
       date,
     };

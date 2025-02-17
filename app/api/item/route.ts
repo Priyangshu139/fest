@@ -23,6 +23,8 @@ async function createItem(data: {
   price: number | null;
   image: string[];
   rating: number | null;
+  inventory: number;
+  distributor: string[];
 }) {
   try {
     const response = await database.createDocument(DATABASE_ID, COLLECTION_ID, ID.unique(), data);
@@ -50,21 +52,18 @@ async function fetchItems() {
 // POST API → Create an Item
 export async function POST(req: Request) {
   try {
-    const { name, description, tags, price, image, rating } = await req.json();
-
-    // Ensure name is provided
-    if (!name) {
-      return NextResponse.json({ error: "Name is required" }, { status: 400 });
-    }
+    const { name, description, tags, price, image, rating, inventory, distributor } = await req.json();
 
     // Default values if fields are missing
     const newItem = await createItem({
-      name,
+      name: name || "UnNammed",
       description: description || [],
       tags: tags || [],
       price: price ?? null,
       image: image || [],
       rating: rating ?? null,
+      inventory: inventory ?? 1,
+      distributor: distributor || [],
     });
 
     return NextResponse.json({ message: "Item created", item: newItem });
