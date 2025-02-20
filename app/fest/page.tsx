@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import Navbar from "../components/Navbar";
 import { FaDiscord, FaWhatsapp, FaTelegram, FaLinkedin } from "react-icons/fa";
+import Footer from "../components/Footer";
 
 interface FestType {
   $id: string;
@@ -112,34 +113,9 @@ const FestPage = () => {
         )}
       </div>
 
-      {/* Social Media Icons */}
-      <div className="absolute bottom-4 left-4 flex space-x-4">
-        <a href="https://discord.com" target="_blank" rel="noopener noreferrer">
-          <FaDiscord className="w-8 h-8 text-gray-700 hover:text-black" />
-        </a>
-        <a href="https://wa.me" target="_blank" rel="noopener noreferrer">
-          <FaWhatsapp className="w-8 h-8 text-gray-700 hover:text-black" />
-        </a>
-        <a href="https://telegram.org" target="_blank" rel="noopener noreferrer">
-          <FaTelegram className="w-8 h-8 text-gray-700 hover:text-black" />
-        </a>
-        <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer">
-          <FaLinkedin className="w-8 h-8 text-gray-700 hover:text-black" />
-        </a>
-      </div>
 
-      {/* About Us Link */}
-      <div className="absolute bottom-4 right-4 text-right">
-        <a href="/about" className="text-yellow-900 hover:text-black block">
-          About Us
-        </a>
-        <a href="/about" className="text-gray-700 hover:text-black block">
-          lorem ipsum
-        </a>
-        <a href="/about" className="text-gray-700 hover:text-black block">
-          end
-        </a>
-      </div>
+
+      <Footer />
     </div>
   );
 };

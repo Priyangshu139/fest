@@ -1,19 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import axios from "axios";
 import Navbar from "../../components/Navbar";
-import { FaDiscord, FaWhatsapp, FaTelegram, FaLinkedin } from "react-icons/fa";
-import { FaBox } from "react-icons/fa"; // Icon for quantity
+import { FaBox } from "react-icons/fa";
+import Footer from "@/app/components/Footer";
 
 interface FestType {
   $id: string;
   name?: string;
-  description?: string;
   date?: string;
-  image?: string[];
-  packs?: string[];
 }
 
 interface PackType {
@@ -37,34 +34,66 @@ const FestPage = () => {
   const [items, setItems] = useState<{ [key: string]: ItemType }>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
   const { id } = useParams();
 
   useEffect(() => {
     const fetchFestAndPacks = async () => {
       try {
-        const festResponse = await axios.get(`http://localhost:3000/api/fest/${id}`);
-        const packsResponse = await axios.get("http://localhost:3000/api/pack/");
-        
-        const festData = festResponse.data;
-        const packsData = packsResponse.data.filter((pack: PackType) => pack.fest === id);
-
-        setFest(festData);
+        // Fetch Fest Details
+        const festResponse = await axios.get(`/api/fest/${id}`);
+        setFest(festResponse.data.fest || festResponse.data);
+    
+        // Fetch Packs by Fest ID
+        const packsResponse = await axios.get(`/api/pack_by_fest/${id}`);
+        const packsData = packsResponse.data.data;
         setPacks(packsData);
+    
+        // Get all unique item IDs
+        const itemIds = [...new Set(packsData.flatMap((pack: PackType) => pack.item))];
+        console.log("Item IDs to fetch:", itemIds);
+    
+        // Fetch all items concurrently
+        const itemResponses = await Promise.all(
+          itemIds.map(async (itemId) => {
+            try {
+              const response = await axios.get(`/api/item/${itemId}`);
+              console.log(`Raw response for item ${itemId}:`, response.data);
+              return {
+                id: itemId,
+                // Access the actual item data from response
+                data: response.data // we'll process this in the reducer
+              };
+            } catch (error) {
+              console.error(`Error fetching item ${itemId}:`, error);
+              return null;
+            }
+          })
+        ).then(responses => responses.filter(response => response !== null));
 
-        // Fetch item details
-        const itemIds = packsData.flatMap(pack => pack.item);
-        const uniqueItemIds = [...new Set(itemIds)];
-        const itemPromises = uniqueItemIds.map(itemId => axios.get(`http://localhost:3000/api/item/${itemId}`));
-        const itemResponses = await Promise.all(itemPromises);
-        const itemsData = itemResponses.reduce((acc, response) => {
-          acc[response.data.$id] = response.data;
+        // Create items object with proper mapping
+        const newItems = itemResponses.reduce((acc, response) => {
+          if (!response) return acc;
+          
+          const { id, data } = response;
+          // Log the entire data object to see its structure
+          console.log(`Processing item ${id}:`, data);
+          
+          acc[id] = {
+            $id: id,
+            name: data.item.name || "Unknown Item"
+          };
+          
+          // Log the processed item
+          console.log(`Processed item ${id}:`, acc[id]);
+          
           return acc;
         }, {} as { [key: string]: ItemType });
 
-        setItems(itemsData);
-      } catch (err: any) {
-        setError("Failed to fetch fest or packs");
+        console.log("Final items mapping:", newItems);
+        setItems(newItems);
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        setError("Failed to fetch data");
       } finally {
         setLoading(false);
       }
@@ -82,7 +111,13 @@ const FestPage = () => {
       <div className="max-w-6xl mx-auto px-4">
         {fest && (
           <>
-            <h1 className="text-3xl font-bold text-center mb-6 text-gray-900">{fest.name}</h1>
+            <h1 className="text-3xl font-bold text-center mb-6 text-gray-900">
+              {fest.name || "Unknown Fest"}
+            </h1>
+            <p className="text-center text-gray-600 mb-8">
+              Date: {fest.date ? new Date(fest.date).toLocaleDateString() : "No Date Available"}
+            </p>
+
             <div className="flex flex-wrap -mx-2 mb-16">
               {packs.map((pack) => (
                 <div key={pack.$id} className="w-full sm:w-1/2 md:w-1/3 px-2 mb-4">
@@ -106,35 +141,7 @@ const FestPage = () => {
           </>
         )}
       </div>
-
-      {/* Social Media Icons */}
-      <div className="absolute bottom-4 left-4 flex space-x-4">
-        <a href="https://discord.com" target="_blank" rel="noopener noreferrer">
-          <FaDiscord className="w-8 h-8 text-gray-700 hover:text-black" />
-        </a>
-        <a href="https://wa.me" target="_blank" rel="noopener noreferrer">
-          <FaWhatsapp className="w-8 h-8 text-gray-700 hover:text-black" />
-        </a>
-        <a href="https://telegram.org" target="_blank" rel="noopener noreferrer">
-          <FaTelegram className="w-8 h-8 text-gray-700 hover:text-black" />
-        </a>
-        <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer">
-          <FaLinkedin className="w-8 h-8 text-gray-700 hover:text-black" />
-        </a>
-      </div>
-
-      {/* About Us Link */}
-      <div className="absolute bottom-4 right-4 text-right">
-        <a href="/about" className="text-yellow-900 hover:text-black block">
-          About Us
-        </a>
-        <a href="/about" className="text-gray-700 hover:text-black block">
-          lorem ipsum
-        </a>
-        <a href="/about" className="text-gray-700 hover:text-black block">
-          end
-        </a>
-      </div>
+      <Footer />
     </div>
   );
 };

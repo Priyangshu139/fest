@@ -4,15 +4,26 @@ import { NextResponse } from "next/server";
 
 const database = new Databases(client);
 
+// Environment Variables
 const DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_item_ID as string;
-const COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_COLLECTION_ID as string;
+const COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_ITEM_COLLECTION_ID as string;
 
-// Debugging: Ensure environment variables are loaded
-console.log("Database ID:", DATABASE_ID);
-console.log("Collection ID:", COLLECTION_ID);
+console.log("Item Collection ID:", COLLECTION_ID);
 
 if (!DATABASE_ID || !COLLECTION_ID) {
   throw new Error("Missing Appwrite Database or Collection ID in environment variables.");
+}
+
+// Define ItemType (All fields optional)
+interface ItemType {
+  name?: string;
+  description?: string;
+  tags?: string[];
+  price?: number;
+  image?: string[];
+  rating?: number;
+  inventory?: number;
+  distributor?: string[];
 }
 
 // Fetch a specific item
@@ -55,18 +66,6 @@ function getIdFromUrl(req: Request): string {
   return parts[parts.length - 1]; // Extract ID from URL
 }
 
-// Define the expected item type
-interface ItemType {
-  name: string;
-  description: string[];
-  tags: string[];
-  price: number | null;
-  image: string[];
-  rating: number | null;
-  inventory: number;
-  distributor: string[];
-}
-
 // GET API Route - Fetch a specific item
 export async function GET(req: Request) {
   try {
@@ -98,12 +97,12 @@ export async function PUT(req: Request) {
     const updatedData: Partial<ItemType> = {
       name,
       description,
-      tags,
+      tags: tags || [],
       price,
-      image,
+      image: image || [],
       rating,
       inventory,
-      distributor,
+      distributor: distributor || [],
     };
 
     const updatedItem = await updateItem(id, updatedData);
