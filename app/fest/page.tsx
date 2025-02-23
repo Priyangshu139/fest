@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import Navbar from "../components/Navbar";
-import { FaDiscord, FaWhatsapp, FaTelegram, FaLinkedin } from "react-icons/fa";
+import Loader from "../components/Loader";
 import Footer from "../components/Footer";
 
 interface FestType {
@@ -32,20 +32,15 @@ const FestPage = () => {
           const dateA = new Date(a.date || "");
           const dateB = new Date(b.date || "");
 
-          // If both festivals are in the future, sort by closest date
           if (dateA >= today && dateB >= today) {
             return dateA.getTime() - dateB.getTime();
           }
-
-          // If one is in the future and one is in the past, move past festivals to the end
           if (dateA < today && dateB >= today) {
             return 1;
           }
           if (dateA >= today && dateB < today) {
             return -1;
           }
-
-          // If both are in the past, sort by the most recent past event
           return dateB.getTime() - dateA.getTime();
         });
 
@@ -64,8 +59,12 @@ const FestPage = () => {
     router.push(`/fest/${festId}`);
   };
 
-  if (loading) return <p className="text-center text-gray-500">Loading...</p>;
-  if (error) return <p className="text-center text-red-500">{error}</p>;
+  if (loading) return <Loader />;
+  if (error) return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <p className="text-center text-red-500 text-lg">{error}</p>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gray-100 py-8 relative">
@@ -112,9 +111,6 @@ const FestPage = () => {
           </>
         )}
       </div>
-
-
-
       <Footer />
     </div>
   );

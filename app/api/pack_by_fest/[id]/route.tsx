@@ -42,11 +42,11 @@ async function fetchPacksByFestival(festId: string) {
 
 // GET route handler
 export async function GET(
-  request: Request,
+  req: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const festId = params.id;
+    const { id: festId } = await Promise.resolve(params);
     
     if (!festId) {
       return NextResponse.json(
