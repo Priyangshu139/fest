@@ -20,9 +20,10 @@ interface FestType {
 
 export async function GET(req: NextRequest) {
   try {
-    const url = new URL(req.url);
-    const id = url.pathname.split("/").pop(); // Extract ID from the URL
-
+   // const url = new URL(req.url);
+   // const id = url.pathname.split("/").pop(); // Extract ID from the URL
+    const id = req.nextUrl.pathname.split("/").pop();
+    
     if (!id) return NextResponse.json({ error: "Invalid fest ID" }, { status: 400 });
 
     const fest = await database.getDocument(DATABASE_ID, COLLECTION_ID, id);
