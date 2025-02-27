@@ -15,8 +15,8 @@ const Navbar = () => {
     <nav className="bg-white shadow-md py-4 px-6">
       <div className="max-w-6xl mx-auto flex justify-between items-center">
         {/* Logo */}
-        <Link href="/">
-          <span className="text-xl font-bold text-gray-900 cursor-pointer">FestiveShop</span>
+        <Link href="/fest">
+          <span className="text-xl font-bold text-gray-900 cursor-pointer">Festiva</span>
         </Link>
 
         {/* Right-side Navigation */}

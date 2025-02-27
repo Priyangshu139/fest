@@ -25,13 +25,13 @@ const socialLinks: SocialLink[] = [
   },
   {
     name: 'WhatsApp',
-    href: 'https://wa.me',
+    href: 'https://wa.me/919835128149',
     icon: FaWhatsapp,
     hoverColor: 'hover:text-[#25D366]'
   },
   {
     name: 'Telegram',
-    href: 'https://telegram.org',
+    href: 'https://t.me/Pratiksingh03',
     icon: FaTelegram,
     hoverColor: 'hover:text-[#0088cc]'
   },
@@ -56,17 +56,17 @@ const socialLinks: SocialLink[] = [
 ];
 
 const quickLinks: FooterLink[] = [
-  { name: 'About Us', href: '/about' },
-  { name: 'Contact', href: '/contact' },
-  { name: 'Privacy Policy', href: '/privacy' },
-  { name: 'Terms of Service', href: '/terms' }
+  { name: 'About Us', href: '/footer/about' },
+  { name: 'Contact', href: '/footer/contact' },
+  { name: 'Privacy Policy', href: '/footer/privacy' },
+  { name: 'Terms of Service', href: '/footer/terms' }
 ];
 
 const resourceLinks: FooterLink[] = [
-  { name: 'Blog', href: '/blog' },
-  { name: 'FAQ', href: '/faq' },
-  { name: 'Support', href: '/support' },
-  { name: 'Careers', href: '/careers' }
+  { name: 'Blog', href: '/footer/blog' },
+  { name: 'FAQ', href: '/footer/faq' },
+  { name: 'Support', href: '/footer/support' },
+  { name: 'Careers', href: '/footer/careers' }
 ];
 
 const Footer = () => {

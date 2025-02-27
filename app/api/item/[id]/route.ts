@@ -6,7 +6,7 @@ const database = new Databases(client);
 
 // Environment Variables
 const DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_item_ID as string;
-const COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_ITEM_COLLECTION_ID as string;
+const COLLECTION_ID = "67ae0050001a3d324128"; // Updated collection ID
 
 console.log("Item Collection ID:", COLLECTION_ID);
 
@@ -14,16 +14,16 @@ if (!DATABASE_ID || !COLLECTION_ID) {
   throw new Error("Missing Appwrite Database or Collection ID in environment variables.");
 }
 
-// Define ItemType (All fields optional)
+// Updated ItemType interface with optional fields
 interface ItemType {
   name?: string;
-  description?: string;
-  tags?: string[];
-  price?: number;
-  image?: string[];
+  description?: string[];
+  tags?: string[]; // enum array
+  image?: string[]; // URL array
   rating?: number;
-  inventory?: number;
   distributor?: string[];
+  inventory?: number[];
+  price?: number[];
 }
 
 // Fetch a specific item
@@ -88,21 +88,21 @@ export async function DELETE(req: Request) {
   }
 }
 
-// PUT API Route - Update a specific item
+// Updated PUT API Route
 export async function PUT(req: Request) {
   try {
     const id = getIdFromUrl(req);
     const { name, description, tags, price, image, rating, inventory, distributor } = await req.json();
 
     const updatedData: Partial<ItemType> = {
-      name,
-      description,
-      tags: tags || [],
-      price,
-      image: image || [],
-      rating,
-      inventory,
-      distributor: distributor || [],
+      ...(name !== undefined && { name }),
+      ...(description !== undefined && { description }),
+      ...(tags !== undefined && { tags }),
+      ...(price !== undefined && { price }),
+      ...(image !== undefined && { image }),
+      ...(rating !== undefined && { rating }),
+      ...(inventory !== undefined && { inventory }),
+      ...(distributor !== undefined && { distributor }),
     };
 
     const updatedItem = await updateItem(id, updatedData);
