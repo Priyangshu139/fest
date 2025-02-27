@@ -1,4 +1,4 @@
-import client from "@/lib/appwrite_client";
+import client from "../../appwrite_client";
 import { Databases } from "appwrite";
 import { NextResponse } from "next/server";
 

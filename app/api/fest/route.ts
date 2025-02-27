@@ -1,4 +1,4 @@
-import client from "@/lib/appwrite_client";
+import client from "../appwrite_client";
 import { Databases, ID } from "appwrite";
 import { NextResponse } from "next/server";
 
@@ -8,8 +8,11 @@ const COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_FEST_COLLECTION_ID as str
 
 console.log("Fest Collection ID:", COLLECTION_ID);
 
+// Add error handling for environment variables
 if (!DATABASE_ID || !COLLECTION_ID) {
-  throw new Error("Missing Appwrite Database or Collection ID in environment variables.");
+  console.error("Database ID:", DATABASE_ID);
+  console.error("Collection ID:", COLLECTION_ID);
+  throw new Error("Missing required environment variables");
 }
 
 // Define FestType (All fields optional)
