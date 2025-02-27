@@ -36,6 +36,31 @@ interface SelectedItems {
   };
 }
 
+interface CartPackItem {
+  type: 'pack';
+  packId: string;
+  packName: string;
+  items: {
+    itemId: string;
+    itemName: string;
+    quantity: number;
+  }[];
+  price: number;
+  description: string;
+}
+
+interface CartSingleItem {
+  type: 'item';
+  itemId: string;
+  packId: string;
+  itemName: string;
+  packName: string;
+  quantity: number;
+  price: number;
+}
+
+type CartItem = CartPackItem | CartSingleItem;
+
 const FestPage = () => {
   const [fest, setFest] = useState<FestType | null>(null);
   const [packs, setPacks] = useState<PackType[]>([]);
@@ -67,7 +92,7 @@ const FestPage = () => {
             try {
               const response = await axios.get(`/api/item/${itemId}`);
               console.log(`Raw response for item ${itemId}:`, response.data);
-              return { id: itemId, data: response.data };
+              return { id: itemId as string, data: response.data };
             } catch (error) {
               console.error(`Error fetching item ${itemId}:`, error);
               return null;
@@ -78,8 +103,15 @@ const FestPage = () => {
         // Create items object with proper mapping
         const newItems = itemResponses.reduce((acc: { [key: string]: ItemType }, response) => {
           if (!response) return acc;
-          const { id, data } = response as { id: string; data: any }; // Explicitly type response
-          acc[id] = { $id: id, name: data.name || "Unknown Item" };
+          const { id, data } = response;
+          
+          // Use the correct path to access the item name
+          // Check if data.item exists first, then access name property
+          acc[id] = { 
+            $id: id, 
+            name: data.item?.name || data.name || "Unknown Item" 
+          };
+          
           return acc;
         }, {});
 
@@ -138,8 +170,79 @@ const FestPage = () => {
 
   const getSelectedItemsCount = () => {
     return Object.values(selectedItems).reduce((total, pack) => {
+      // If the entire pack is selected, count all its items
+      if (pack.isPackSelected) {
+        return total + Object.keys(pack.items).length;
+      }
+      // Otherwise, count only the individually selected items
       return total + Object.values(pack.items).filter(Boolean).length;
     }, 0);
+  };
+
+  const handleAddToCart = () => {
+    const cartItems: CartItem[] = [];
+
+    // Process each pack
+    Object.entries(selectedItems).forEach(([packId, packData]) => {
+      const pack = packs.find(p => p.$id === packId);
+      if (!pack) return;
+
+      // If the entire pack is selected, add it as one item
+      if (packData.isPackSelected) {
+        cartItems.push({
+          type: 'pack',
+          packId,
+          packName: pack.name,
+          items: pack.item.map((itemId, index) => ({
+            itemId,
+            itemName: items[itemId]?.name || "Unknown Item",
+            quantity: pack.quantity[index] || 1
+          })),
+          price: pack.price,
+          description: pack.description
+        });
+      } else {
+        // Add individual selected items from this pack
+        const selectedPackItems: CartSingleItem[] = Object.entries(packData.items)
+          .filter(([_, isSelected]) => isSelected)
+          .map(([itemId]) => ({
+            type: 'item',
+            itemId,
+            packId,
+            itemName: items[itemId]?.name || "Unknown Item",
+            packName: pack.name,
+            quantity: pack.quantity[pack.item.indexOf(itemId)] || 1,
+            price: pack.price
+          }));
+
+        cartItems.push(...selectedPackItems);
+      }
+    });
+
+    // Save to localStorage
+    try {
+      const existingCart = JSON.parse(localStorage.getItem('cart') || '[]');
+      const updatedCart = [...existingCart, ...cartItems];
+      localStorage.setItem('cart', JSON.stringify(updatedCart));
+      
+      // Reset selections after adding to cart
+      const resetSelection = Object.keys(selectedItems).reduce((acc: SelectedItems, packId) => {
+        acc[packId] = {
+          isPackSelected: false,
+          items: Object.keys(selectedItems[packId].items).reduce((itemAcc: { [key: string]: boolean }, itemId) => ({
+            ...itemAcc,
+            [itemId]: false
+          }), {})
+        };
+        return acc;
+      }, {});
+      
+      setSelectedItems(resetSelection);
+      alert('Items added to cart successfully!');
+    } catch (error) {
+      console.error('Error adding items to cart:', error);
+      alert('Failed to add items to cart. Please try again.');
+    }
   };
 
   if (loading) return <Loader />;
@@ -231,9 +334,9 @@ const FestPage = () => {
       <Footer />
       
       {/* Add to Cart Button */}
-      {getSelectedItemsCount() > 0 && (
+      {getSelectedItemsCount() > 0 ? (
         <button
-          onClick={() => {/* Add your cart logic here */}}
+          onClick={handleAddToCart}
           className="fixed bottom-8 right-8 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full shadow-lg flex items-center space-x-2 transition-all transform hover:scale-105"
           style={{ zIndex: 1000 }}
         >
@@ -242,7 +345,7 @@ const FestPage = () => {
             Add to Cart ({getSelectedItemsCount()})
           </span>
         </button>
-      )}
+      ) : null}
     </div>
   );
 };
