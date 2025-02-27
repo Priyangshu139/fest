@@ -1,6 +1,7 @@
 import client from "@/lib/appwrite_client";
 import { Databases } from "appwrite";
 import { NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
 const database = new Databases(client);
 const DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_item_ID as string;
@@ -17,9 +18,12 @@ interface FestType {
   date?: string;
 }
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest) {
   try {
-    const { id } = await Promise.resolve(params);
+   // const url = new URL(req.url);
+   // const id = url.pathname.split("/").pop(); // Extract ID from the URL
+    const id = req.nextUrl.pathname.split("/").pop();
+    
     if (!id) return NextResponse.json({ error: "Invalid fest ID" }, { status: 400 });
 
     const fest = await database.getDocument(DATABASE_ID, COLLECTION_ID, id);
@@ -30,9 +34,11 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest) {
   try {
-    const { id } = await Promise.resolve(params);
+    const url = new URL(req.url);
+    const id = url.pathname.split("/").pop();
+
     if (!id) return NextResponse.json({ error: "Invalid fest ID" }, { status: 400 });
 
     await database.deleteDocument(DATABASE_ID, COLLECTION_ID, id);
@@ -43,9 +49,11 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
   }
 }
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest) {
   try {
-    const { id } = await Promise.resolve(params);
+    const url = new URL(req.url);
+    const id = url.pathname.split("/").pop();
+
     if (!id) return NextResponse.json({ error: "Invalid fest ID" }, { status: 400 });
 
     const data: Partial<FestType> = await req.json();
