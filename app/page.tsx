@@ -26,7 +26,7 @@ export default function Home() {
             href="/admin/fest"
             className="block w-full p-4 text-center bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
           >
-            Enter as Admin
+                        Enter as Admin(ui ganda hai,baad mei dekhenge)
           </Link>
 
           {/* Distributor Section */}
