@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
 
 interface Distributor {
   $id: string;
@@ -71,8 +72,17 @@ export default function EditDistributor() {
 
   return (
     <div className="p-6 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Edit Distributor</h1>
-      
+      <div className="flex items-center justify-between mb-6">
+        <button
+          onClick={() => router.back()}
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+        >
+          <ArrowLeft size={20} />
+          <span>Back</span>
+        </button>
+        <h1 className="text-2xl font-bold">Edit Distributor</h1>
+      </div>
+
       {message && (
         <div className="mb-4 p-3 bg-blue-100 text-blue-700 rounded">
           {message}

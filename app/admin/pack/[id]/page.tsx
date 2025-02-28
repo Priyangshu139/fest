@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { PlusCircle, X, Trash2 } from 'lucide-react';
+import { PlusCircle, X, Trash2, ArrowLeft } from 'lucide-react';
 
 interface Pack {
   $id: string;
@@ -35,6 +35,7 @@ export default function EditPack() {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -123,12 +124,64 @@ export default function EditPack() {
     });
   };
 
+  const handleDeleteItem = async (itemId: string) => {
+    try {
+      const itemIndex = packData.item.indexOf(itemId);
+      if (itemIndex === -1) return;
+      
+      const newItems = [...packData.item];
+      const newQuantities = [...packData.quantity];
+      newItems.splice(itemIndex, 1);
+      newQuantities.splice(itemIndex, 1);
+      
+      const updatedPackData = {
+        ...packData,
+        item: newItems,
+        quantity: newQuantities
+      };
+
+      // Update backend
+      const response = await fetch(`/api/pack/${params.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedPackData),
+      });
+
+      if (response.ok) {
+        // Update local state only after successful backend update
+        setPackData(updatedPackData);
+        setMessage('Item removed successfully');
+      } else {
+        setMessage('Failed to remove item');
+      }
+    } catch (error) {
+      console.error('Error removing item:', error);
+      setMessage('Failed to remove item');
+    }
+  };
+
+  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      router.push(`/admin/itempick?pack=${params.id}&search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery("");
+    }
+  };
+
   if (loading) return <div className="p-6">Loading...</div>;
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Edit Pack</h1>
-      
+      <div className="flex items-center justify-between mb-6">
+        <button
+          onClick={() => router.back()}
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+        >
+          <ArrowLeft size={20} />
+          <span>Back</span>
+        </button>
+        <h1 className="text-2xl font-bold">Edit Pack</h1>
+      </div>
+
       {message && (
         <div className="mb-4 p-3 bg-blue-100 text-blue-700 rounded">
           {message}
@@ -170,37 +223,65 @@ export default function EditPack() {
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">Items:</label>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {items.map((item) => (
-              <div
-                key={item.$id}
-                className={`p-4 border rounded cursor-pointer ${
-                  packData.item.includes(item.$id)
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'hover:border-gray-400'
-                }`}
-                onClick={() => handleItemSelect(item.$id)}
-              >
-                <div className="flex justify-between items-center">
-                  <span>{item.name}</span>
-                  {packData.item.includes(item.$id) && (
-                    <input
-                      type="number"
-                      min="1"
-                      value={packData.quantity[packData.item.indexOf(item.$id)]}
-                      onChange={(e) => handleQuantityChange(
-                        packData.item.indexOf(item.$id),
-                        parseInt(e.target.value)
-                      )}
-                      onClick={(e) => e.stopPropagation()}
-                      className="w-20 p-1 border rounded"
-                    />
-                  )}
+          <div className="flex justify-between items-center mb-2">
+            <label className="text-sm font-medium text-gray-700">
+              Items ({packData.item.length})
+            </label>
+          </div>
+          <div className="space-y-2">
+            {items
+              .filter(item => packData.item.includes(item.$id))
+              .map((item) => (
+                <div
+                  key={item.$id}
+                  className="flex items-center gap-4 p-3 border rounded bg-white"
+                >
+                  <span className="flex-grow font-medium">{item.name}</span>
+                  <input
+                    type="number"
+                    min="1"
+                    value={packData.quantity[packData.item.indexOf(item.$id)]}
+                    onChange={(e) => handleQuantityChange(
+                      packData.item.indexOf(item.$id),
+                      parseInt(e.target.value)
+                    )}
+                    className="w-20 p-1 border rounded"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteItem(item.$id)}
+                    className="p-1 text-red-500 hover:text-red-700 transition-colors"
+                    title="Remove item"
+                  >
+                    <Trash2 size={18} />
+                  </button>
                 </div>
-              </div>
             ))}
           </div>
+        </div>
+
+        <div className="relative">
+          <input
+            type="text"
+            className="w-full p-2 border rounded-lg pr-12"
+            placeholder="Search more items to add..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={handleSearch}
+          />
+          <button
+            type="button"
+            onClick={() => {
+              if (searchQuery.trim()) {
+                router.push(`/admin/itempick?pack=${params.id}&search=${encodeURIComponent(searchQuery.trim())}`);
+                setSearchQuery("");
+              }
+            }}
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-500 text-white p-1.5 rounded-md hover:bg-blue-600 flex items-center gap-1"
+          >
+            <PlusCircle size={16} />
+            <span>Add</span>
+          </button>
         </div>
 
         <button

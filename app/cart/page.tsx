@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { FaTrash, FaBox } from "react-icons/fa";
@@ -17,6 +18,7 @@ interface CartItem {
 export default function CartPage() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     try {
@@ -42,6 +44,11 @@ export default function CartPage() {
 
   const getTotalPrice = () => {
     return cartItems.reduce((total, item) => total + item.price, 0);
+  };
+
+  const handleCheckout = () => {
+    const totalPrice = getTotalPrice();
+    router.push(`/payments?amount=${totalPrice}`);
   };
 
   const groupedByPack = cartItems.reduce((acc, item) => {
@@ -123,7 +130,7 @@ export default function CartPage() {
               </div>
               <button
                 className="w-full mt-6 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors"
-                onClick={() => alert('Checkout functionality to be implemented')}
+                onClick={handleCheckout}
               >
                 Proceed to Checkout
               </button>
